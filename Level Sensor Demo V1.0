@@ -1,0 +1,100 @@
+// Level and Battery Monitoring Node 201 Using RF NANO
+//Reese Holford
+// Using the Mysensors library
+
+
+
+// Enable debug prints
+#define MY_DEBUG
+#define MY_RF24_CE_PIN 10 
+#define MY_RF24_CS_PIN 9
+#define MY_PARENT_NODE_ID 0
+#define MY_PARENT_NODE_IS_STATIC
+
+
+// Enable passive mode
+#define MY_PASSIVE_NODE
+
+// Passive mode requires static node ID
+#define MY_NODE_ID 202
+
+// Enable and select radio type attached
+#define MY_RADIO_RF24
+//#define MY_RADIO_NRF5_ESB
+//#define MY_RADIO_RFM69
+//#define MY_RADIO_RFM95
+
+#include <MySensors.h>
+
+#define LevelSensor_ID 0   // Id of the Soil Sensor
+
+
+// Initialize general message
+MyMessage msg(LevelSensor_ID, V_LEVEL);
+
+
+//Initialize Sensor pin and output value sent 
+// defines variables
+long duration; // variable for the duration of sound wave travel
+int distance; // variable for the distance measurement
+int echoPin=3;  // attach pin D2 Arduino to pin Echo of HC-SR04
+int trigPin=2;  //attach pin D3 Arduino to pin Trig of HC-SR04
+
+
+
+
+void setup()
+{
+  Serial.begin(9600);
+  pinMode(2, OUTPUT); // Sets the trigPin as an OUTPUT
+  pinMode(3, INPUT); // Sets the echoPin as an INPUT
+
+ 
+}
+
+void presentation()
+{
+  // Send the sketch version information to the gateway and controller
+  sendSketchInfo("Level Sensor Node 202", "1.0");
+
+  // Register all sensors to gw (they will be created as child devices)
+  present(LevelSensor_ID, S_DISTANCE);
+ 
+  
+}
+
+void loop()
+{
+
+
+
+
+ digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin HIGH (ACTIVE) for 10 microseconds
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echoPin, HIGH);
+  // Calculating the distance
+  distance = duration * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
+  // Displays the distance on the Serial Monitor
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+
+
+ 
+ 
+//Send Distant Reading to Gateway
+  send(msg.set(distance));
+  delay(60);
+
+
+
+
+
+  
+}
